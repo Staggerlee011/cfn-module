@@ -1,0 +1,102 @@
+---
+# Copyright 2018 widdix GmbH
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'cfn-modules: Fargate ALB to single container example'
+Resources:
+  Alerting:
+    Type: 'AWS::CloudFormation::Stack'
+    Properties:
+      Parameters:
+        Email: 'stebennettsjb@gmail.com' # replace with your email address to receive alerts
+        # HttpsEndpoint: 'https://api.marbot.io/v1/endpoint/xyz' # or uncommnet and receive alerts in Slack using marbot.io
+      TemplateURL: './node_modules/@cfn-modules/alerting/module.yml'
+  Vpc:
+    Type: 'AWS::CloudFormation::Stack'
+    Properties:
+      Parameters:
+        AlertingModule: !GetAtt 'Alerting.Outputs.StackName'
+        S3Endpoint: 'false' # speed up the example
+        DynamoDBEndpoint: 'false' # speed up the example
+        FlowLog: 'false' # speed up the example
+        NatGateways: 'false' # speed up the example
+      TemplateURL: './node_modules/@cfn-modules/vpc/module.yml'
+  Cluster:
+    Type: 'AWS::CloudFormation::Stack'
+    Properties:
+      TemplateURL: './node_modules/@cfn-modules/ecs-cluster/module.yml'
+  Alb:
+    Type: 'AWS::CloudFormation::Stack'
+    Properties:
+      Parameters:
+        VpcModule: !GetAtt 'Vpc.Outputs.StackName'
+        AlertingModule: !GetAtt 'Alerting.Outputs.StackName'
+      TemplateURL: './node_modules/@cfn-modules/alb/module.yml'
+  AlbListener:
+    Type: 'AWS::CloudFormation::Stack'
+    Properties:
+      Parameters:
+        AlbModule: !GetAtt 'Alb.Outputs.StackName'
+      TemplateURL: './node_modules/@cfn-modules/alb-listener/module.yml'
+  Target:
+    Type: 'AWS::CloudFormation::Stack'
+    Properties:
+      Parameters:
+        AlbModule: !GetAtt 'Alb.Outputs.StackName'
+        AlbListenerModule: !GetAtt 'AlbListener.Outputs.StackName'
+        VpcModule: !GetAtt 'Vpc.Outputs.StackName'
+        AlertingModule: !GetAtt 'Alerting.Outputs.StackName'
+      TemplateURL: './node_modules/@cfn-modules/ecs-alb-target/module.yml'
+  Service:
+    Type: 'AWS::CloudFormation::Stack'
+    Properties:
+      Parameters:
+        ClusterModule: !GetAtt 'Cluster.Outputs.StackName'
+        VpcModule: !GetAtt 'Vpc.Outputs.StackName'
+        TargetModule: !GetAtt 'Target.Outputs.StackName'
+        AlertingModule: !GetAtt 'Alerting.Outputs.StackName'
+        ClientSgModule1: !GetAtt 'ClientSg.Outputs.StackName'
+        AppImage: 'wordpress:latest'
+        AppEnvironment1Key: 'WORDPRESS_DB_HOST' # optional
+        AppEnvironment1Value: !GetAtt 'Database.Outputs.DnsName'
+        AppEnvironment2Key: 'WORDPRESS_DB_USER' # optional
+        AppEnvironment2Value: 'wp' # optional
+        AppEnvironment3Key: 'WORDPRESS_DB_PASSWORD' # optional
+        AppEnvironment3Value: 'insecure' # optional
+        AppEnvironment4Key: 'WORDPRESS_DB_NAME' # optional
+        AppEnvironment4Value: 'wordpress:3306' # optional
+        AppPort: '80'
+      TemplateURL: './node_modules/@cfn-modules/fargate-service/module.yml'
+  ClientSg:
+    Type: 'AWS::CloudFormation::Stack'
+    Properties:
+      Parameters:
+        VpcModule: !GetAtt 'Vpc.Outputs.StackName'
+      TemplateURL: './node_modules/@cfn-modules/client-sg/module.yml'
+  Database:
+    Type: 'AWS::CloudFormation::Stack'
+    Properties:
+      Parameters:
+        VpcModule: !GetAtt 'Vpc.Outputs.StackName'
+        ClientSgModule: !GetAtt 'ClientSg.Outputs.StackName'
+        AlertingModule: !GetAtt 'Alerting.Outputs.StackName'
+        DBName: 'wordpress'
+        DBMasterUsername: 'wp'
+        DBMasterUserPassword: insecure
+        DBBackupRetentionPeriod: '0' # speed up the example (do not set to 0 in production!)
+        DBMultiAZ: 'false' # speed up the example (do not set to false in production!)
+      TemplateURL: './node_modules/@cfn-modules/rds-mysql/module.yml'
+Outputs:
+  Url:
+    Value: !Sub 'http://${Alb.Outputs.DnsName}'
