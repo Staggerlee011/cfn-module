@@ -70,18 +70,12 @@ Resources:
         AppImage: 'atlassian/confluence-server:latest'
         AppEnvironment1Key: 'ATL_PROXY_NAME' # optional
         AppEnvironment1Value: !GetAtt 'Alb.Outputs.StackName'
-        AppEnvironment2Key: 'ATL_PROXY_PORT' # optional
-        AppEnvironment2Value: '80' # optional
-        AppEnvironment3Key: 'ATL_TOMCAT_SCHEME' # optional
-        AppEnvironment3Value: 'http' # optional
-        AppEnvironment4Key: 'ATL_JDBC_URL' # optional
-        AppEnvironment4Value: !Join ["jdbc:mysql://" , !GetAtt 'Database.Outputs.DnsName' , ":5432/confluence"]
-        AppEnvironment5Key: 'ATL_JDBC_USER' # optional
-        AppEnvironment5Value: 'postgres' # optional
-        AppEnvironment6Key: 'ATL_JDBC_PASSWORD' # optional
-        AppEnvironment6Value: 'mysecretpassword' # optional
-        AppEnvironment7Key: 'ATL_DB_TYPE' # optional
-        AppEnvironment7Value: 'postgresql' # optional
+        AppEnvironment2Key: 'ATL_JDBC_URL' # optional
+        AppEnvironment2Value: !Sub 'jdbc:postgres://${Database.Outputs.DnsName}:5432/confluence'
+        AppEnvironment3Key: 'ATL_JDBC_USER' # optional
+        AppEnvironment3Value: 'postgres' # optional
+        AppEnvironment4Key: 'ATL_JDBC_PASSWORD' # optional
+        AppEnvironment4Value: 'mysecretpassword' # optional
         AppPort: '80'
       TemplateURL: './node_modules/@cfn-modules/fargate-service/module.yml'
   ClientSg:

@@ -5,7 +5,7 @@ Installs confluence container from dockerhub and hosts db on postgres-rds.
 ## Prerequisites
 
 1. [Install Node.js 10.x](https://nodejs.org/)
-1. Create $Bucketname var `$BucketName = "fargate-confluence`
+1. Create $Bucketname var `$BucketName = "fargate-confluence"`
 1. Create the bucket `aws s3 mb s3://$BucketName`
 
 ## Usage

@@ -1,0 +1,5 @@
+FROM atlassian/confluence-server:latest
+
+ENV ATL_PROXY_PORT 80
+ENV ATL_TOMCAT_SCHEME http
+ENV ATL_DB_TYPE postgresql
