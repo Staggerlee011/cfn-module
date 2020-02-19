@@ -67,9 +67,9 @@ Resources:
         TargetModule: !GetAtt 'Target.Outputs.StackName'
         AlertingModule: !GetAtt 'Alerting.Outputs.StackName'
         ClientSgModule1: !GetAtt 'ClientSg.Outputs.StackName'
-        AppImage: 'atlassian/confluence-server:latest'
+        AppImage: '034076074017.dkr.ecr.us-east-1.amazonaws.com/confluence:latest'
         AppEnvironment1Key: 'ATL_PROXY_NAME' # optional
-        AppEnvironment1Value: !GetAtt 'Alb.Outputs.StackName'
+        AppEnvironment1Value: !GetAtt 'Alb.Outputs.DnsName'
         AppEnvironment2Key: 'ATL_JDBC_URL' # optional
         AppEnvironment2Value: !Sub 'jdbc:postgres://${Database.Outputs.DnsName}:5432/confluence'
         AppEnvironment3Key: 'ATL_JDBC_USER' # optional
@@ -77,6 +77,11 @@ Resources:
         AppEnvironment4Key: 'ATL_JDBC_PASSWORD' # optional
         AppEnvironment4Value: 'mysecretpassword' # optional
         AppPort: '80'
+        Cpu: '2' # optional
+        Memory: '4' # optional
+        DesiredCount: '2' # optional
+        MaxCapacity: '4' # optional
+        MinCapacity: '2' # optional
       TemplateURL: './node_modules/@cfn-modules/fargate-service/module.yml'
   ClientSg:
     Type: 'AWS::CloudFormation::Stack'
