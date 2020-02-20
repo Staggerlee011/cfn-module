@@ -77,7 +77,7 @@ Resources:
         AppEnvironment3Value: 'postgres' # optional
         AppEnvironment4Key: 'ATL_JDBC_PASSWORD' # optional
         AppEnvironment4Value: 'mysecretpassword' # optional
-        AppPort: '80'
+        AppPort: '8090'
         Cpu: '2' # optional
         Memory: '4' # optional
         DesiredCount: '2' # optional
