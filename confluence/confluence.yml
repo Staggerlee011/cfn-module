@@ -48,6 +48,7 @@ Resources:
     Properties:
       Parameters:
         AlbModule: !GetAtt 'Alb.Outputs.StackName'
+        Port: '8090'
       TemplateURL: './node_modules/@cfn-modules/alb-listener/module.yml'
   Target:
     Type: 'AWS::CloudFormation::Stack'
@@ -67,7 +68,7 @@ Resources:
         TargetModule: !GetAtt 'Target.Outputs.StackName'
         AlertingModule: !GetAtt 'Alerting.Outputs.StackName'
         ClientSgModule1: !GetAtt 'ClientSg.Outputs.StackName'
-        AppImage: '034076074017.dkr.ecr.us-east-1.amazonaws.com/confluence:latest'
+        AppImage: '794961467219.dkr.ecr.us-east-1.amazonaws.com/confluence'
         AppEnvironment1Key: 'ATL_PROXY_NAME' # optional
         AppEnvironment1Value: !GetAtt 'Alb.Outputs.DnsName'
         AppEnvironment2Key: 'ATL_JDBC_URL' # optional
